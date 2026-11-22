@@ -1,0 +1,54 @@
+{
+  "name": "Parse phone numbers and create records in Airtable using a custom webhook",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "hook": 4158087, "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "phonenumber:TransformerParseNumber",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "number": "{{1.Phone}}", "defaultCountry": "IL" },
+      "metadata": { "designer": { "x": 300, "y": 0 } }
+    },
+    {
+      "id": 3,
+      "module": "airtable:ActionCreateRecord",
+      "version": 3,
+      "parameters": { "__IMTCONN__": 13189675 },
+      "mapper": {
+        "base": "appUGUq8TrYJhQqVm",
+        "table": "tblyeDo6JvQxB37Dr",
+        "typecast": false,
+        "useColumnId": true,
+        "record": {
+          "fldHEww5Re4nPZ7n2": "{{1.Name}}",
+          "fldIjMF1v53plWhXl": "{{2.international}}",
+          "fldFwXJfcmjtG7wFs": "{{1.ShootType}}",
+          "fld3aRJfQcJpZtmPt": "פנייה חדשה"
+        }
+      },
+      "metadata": { "designer": { "x": 600, "y": 0 } }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    }
+  }
+}
