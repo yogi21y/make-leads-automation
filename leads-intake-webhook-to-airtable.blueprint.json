@@ -1,0 +1,137 @@
+{
+  "name": "Leads intake - webhook to Airtable",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "hook": 4157665, "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "metadata": { "designer": { "x": 300, "y": 0 } },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Wrong secret",
+                "conditions": [[{ "a": "{{1.secret}}", "o": "text:notequal", "b": "REPLACE_WITH_YOUR_SECRET" }]]
+              },
+              "mapper": {
+                "status": 403,
+                "body": "{\"ok\":false,\"message\":\"מפתח לא תקין\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }]
+              },
+              "metadata": { "designer": { "x": 600, "y": -200 } }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "airtable:ActionCreateRecord",
+              "version": 3,
+              "parameters": { "__IMTCONN__": 13189675 },
+              "filter": {
+                "name": "Valid lead",
+                "conditions": [
+                  [
+                    { "a": "{{1.secret}}", "o": "text:equal", "b": "REPLACE_WITH_YOUR_SECRET" },
+                    {
+                      "a": "{{if(length(trim(1.Name)) > 0; if(length(trim(1.Phone)) > 0; if(1.ShootType = \"סטילס\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); if(1.ShootType = \"וידאו\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); if(1.ShootType = \"סטילס ווידאו\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); \"no\"))); \"no\"); \"no\")}}",
+                      "o": "text:equal",
+                      "b": "yes"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "base": "appUGUq8TrYJhQqVm",
+                "table": "tblyeDo6JvQxB37Dr",
+                "typecast": false,
+                "useColumnId": true,
+                "record": {
+                  "fldHEww5Re4nPZ7n2": "{{trim(1.Name)}}",
+                  "fldIjMF1v53plWhXl": "{{trim(1.Phone)}}",
+                  "fldFwXJfcmjtG7wFs": "{{1.ShootType}}",
+                  "fldkEZ89IKjW8c0rY": "{{1.Description}}",
+                  "fldvlJx2kqib9Wr9j": "{{1.ShootDate}}",
+                  "fldj4G3LAzrK5ethO": "{{1.Amount}}",
+                  "fld9taST5GgxY2Eef": "{{1.FollowUpDate}}",
+                  "fldU9ys10Svku7YNs": "{{1.Notes}}",
+                  "fld3aRJfQcJpZtmPt": "פנייה חדשה"
+                }
+              },
+              "metadata": { "designer": { "x": 600, "y": 0 } }
+            },
+            {
+              "id": 5,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": 200,
+                "body": "{\"ok\":true,\"message\":\"התקבל\",\"recordId\":\"{{4.id}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }]
+              },
+              "metadata": { "designer": { "x": 900, "y": 0 } }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Invalid lead",
+                "conditions": [
+                  [
+                    { "a": "{{1.secret}}", "o": "text:equal", "b": "REPLACE_WITH_YOUR_SECRET" },
+                    {
+                      "a": "{{if(length(trim(1.Name)) > 0; if(length(trim(1.Phone)) > 0; if(1.ShootType = \"סטילס\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); if(1.ShootType = \"וידאו\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); if(1.ShootType = \"סטילס ווידאו\"; if(ifempty(1.Amount; 0) >= 0; \"yes\"; \"no\"); \"no\"))); \"no\"); \"no\")}}",
+                      "o": "text:equal",
+                      "b": "no"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "status": 400,
+                "body": "{\"ok\":false,\"message\":\"הפנייה לא נשמרה. {{if(length(trim(1.Name)) = 0; \"חסר שם. \"; \"\")}}{{if(length(trim(1.Phone)) = 0; \"חסר טלפון. \"; \"\")}}{{if(1.ShootType = \"סטילס\"; \"\"; if(1.ShootType = \"וידאו\"; \"\"; if(1.ShootType = \"סטילס ווידאו\"; \"\"; \"סוג צילום חסר או לא חוקי. \")))}}{{if(ifempty(1.Amount; 0) >= 0; \"\"; \"הסכום חייב להיות מספר שאינו שלילי.\")}}\"}",
+                "headers": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }]
+              },
+              "metadata": { "designer": { "x": 600, "y": 200 } }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    }
+  }
+}
