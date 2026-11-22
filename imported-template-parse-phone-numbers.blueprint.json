@@ -1,0 +1,50 @@
+{
+  "name": "Parse phone numbers and create records in Airtable using a custom webhook",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "phonenumber:TransformerParseNumber",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": { "designer": { "x": 300, "y": 0 } }
+    },
+    {
+      "id": 3,
+      "module": "airtable:ActionCreateRecord",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "base": "appv2gAGiK5U4MWn4",
+        "table": "tblwP5YaJHhiFM8QU",
+        "record": {},
+        "typecast": false,
+        "useColumnId": false
+      },
+      "metadata": { "designer": { "x": 600, "y": 0 } }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "designer": { "orphans": [] },
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    }
+  }
+}
